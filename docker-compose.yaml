@@ -40,7 +40,28 @@ services:
     ports:
       - "127.0.0.1:8888:8888"
 
+  dagster:
+    build: ./dagster
+    depends_on: [garage, clickhouse]
+    environment:
+      BATCHES_DIR: /data/batches
+      S3_ENDPOINT: http://garage:3900
+      S3_REGION: us-east-1
+      S3_BUCKET: hits
+      GARAGE_ACCESS_KEY: ${GARAGE_ACCESS_KEY}
+      GARAGE_SECRET_KEY: ${GARAGE_SECRET_KEY}
+      CLICKHOUSE_HOST: clickhouse
+    volumes:
+      - ./pipeline:/app/pipeline:ro
+      - ./sql:/app/sql:ro
+      - ./data/batches:/data/batches:ro
+      - dagster-home:/dagster_home
+      - ./dagster/dagster.yaml:/dagster_home/dagster.yaml:ro
+    ports:
+      - "127.0.0.1:3000:3000"
+
 volumes:
   garage-meta:
   garage-data:
   clickhouse-data:
+  dagster-home:
