@@ -1,0 +1,9 @@
+<clickhouse>
+    <named_collections>
+        <garage>
+            <url>http://garage:3900/hits/</url>
+            <access_key_id from_env="GARAGE_ACCESS_KEY"/>
+            <secret_access_key from_env="GARAGE_SECRET_KEY"/>
+        </garage>
+    </named_collections>
+</clickhouse>
