@@ -74,3 +74,29 @@ def hits(context: dg.AssetExecutionContext, clickhouse: ClickHouse) -> dg.Materi
             "ratio": round(data_bytes / disk_bytes, 2),
         }
     )
+
+
+GOLD_MARTS = ["traffic_daily", "traffic_hourly", "sources_daily", "devices_daily"]
+
+
+def gold_mart(name):
+    @dg.asset(name=name, key_prefix="gold", partitions_def=days, deps=[hits])
+    def mart(context: dg.AssetExecutionContext, clickhouse: ClickHouse) -> dg.MaterializeResult:
+        day = context.partition_key
+
+        clickhouse.command("CREATE DATABASE IF NOT EXISTS gold")
+        clickhouse.run_file(f"gold/{name}.sql", day=day)
+
+        expected = clickhouse.scalar("SELECT count() FROM hits WHERE EventDate = {day:String}", day=day)
+        rows, total = clickhouse.row(
+            f"SELECT count(), sum(hits) FROM gold.{name} WHERE EventDate = {{day:String}}", day=day
+        )
+        if total != expected:
+            raise dg.Failure(f"gold.{name} {day}: {total} hits, {expected} in hits")
+
+        return dg.MaterializeResult(metadata={"rows": rows, "hits": total})
+
+    return mart
+
+
+gold_marts = [gold_mart(name) for name in GOLD_MARTS]

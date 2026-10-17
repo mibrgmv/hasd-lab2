@@ -1,10 +1,10 @@
 import dagster as dg
 
-from pipeline.assets import hits, raw_hits
+from pipeline.assets import gold_marts, hits, raw_hits
 from pipeline.resources import S3, Batches, ClickHouse
 
 defs = dg.Definitions(
-    assets=[raw_hits, hits],
+    assets=[raw_hits, hits, *gold_marts],
     resources={
         "batches": Batches(root=dg.EnvVar("BATCHES_DIR")),
         "s3": S3(

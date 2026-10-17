@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS hits_baseline;
-CREATE TABLE hits_baseline AS raw.hits ENGINE = MergeTree PARTITION BY EventDate ORDER BY tuple();
+CREATE TABLE hits_baseline AS raw.hits ENGINE = MergeTree PARTITION BY EventDate ORDER BY EventTime;
 INSERT INTO hits_baseline SELECT * FROM hits;
 
 DROP TABLE IF EXISTS hits_sorted;

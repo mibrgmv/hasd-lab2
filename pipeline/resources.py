@@ -42,11 +42,11 @@ class ClickHouse(dg.ConfigurableResource):
     def client(self):
         return clickhouse_connect.get_client(host=self.host)
 
-    def run_file(self, name):
+    def run_file(self, name, **parameters):
         client = self.client()
         for statement in (SQL_DIR / name).read_text().split(";"):
             if statement.strip():
-                client.command(statement)
+                client.command(statement, parameters=parameters)
 
     def command(self, query, **parameters):
         self.client().command(query, parameters=parameters)
